@@ -163,7 +163,7 @@ exports.userManagement = {
         } else {
           
           const allowedFields = ["first_name", "last_name", "password"]
-          const checkFields = self.userManagement.allowedFields(req, allowedFields)
+          const checkFields = self.userManagement.allowedFields(allowedFields, req)
           if (checkFields.length > 0) {
             return res.status(400).send()
           }
@@ -211,10 +211,10 @@ exports.userManagement = {
   },
 
   allowedFields: (allowedFieldsarr, req) => {
-    const allowedFields = allowedFieldsarr;
+    const _allowedFields = allowedFieldsarr;
     const receivedFields = Object.keys(req.body);
 
-    const invalidFields = receivedFields.filter(field => !allowedFields.includes(field));
+    const invalidFields = receivedFields.filter(field => !_allowedFields.includes(field));
     return invalidFields
   }
 }

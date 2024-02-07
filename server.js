@@ -12,14 +12,13 @@ app.use(express.json())
 
 app.use(addCacheControlHeader);
 
-db.database.sync()
+db.initializeDatabase()
   .then(() => {
-    console.log("Synced db.");
+    console.log("Database initialized and models synced.");
   })
   .catch((err) => {
-    console.log("Failed to sync db: " + err.message);
+    console.log("Failed to initialize database and sync models: " + err.message);
   });
-
 
 app.use("/", api);
 
