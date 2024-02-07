@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-
+    name: integration
     runs-on: windows-latest
 
     steps:
