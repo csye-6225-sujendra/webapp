@@ -37,7 +37,7 @@ exports.checks = {
   whiteListMethods: (req, res, next) => {
     //WhiteListing methods
     if (req.method !== "GET") {
-      res.status(405).send();
+      return res.status(405).send();
     } else {
       next()
     }
@@ -75,6 +75,9 @@ exports.userManagement = {
     const self = this
     try {
 
+      if (Object.keys(req.query).length > 0) {
+        return res.status(400).send()
+      }
       //const { email, password, first_name, last_name } = req.body
       if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
 
@@ -129,8 +132,12 @@ exports.userManagement = {
   getUser: async (req, res) => {
     try {
 
+      if (Object.keys(req.query).length > 0) {
+        return res.status(400).send()
+      }
+
       if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
-        res.status(400).send()
+        return res.status(400).send()
       }
 
       const userId = req.user.id;
@@ -154,6 +161,10 @@ exports.userManagement = {
   updateUser: async (req, res) => {
     const self = this
     try {
+
+      if (Object.keys(req.query).length > 0) {
+      return res.status(400).send()
+    }
 
       if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
 
