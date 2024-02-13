@@ -22,4 +22,4 @@ jobs:
 
     - name: Execute exit 1 for failure testing
       if: failure()
-      run: exit 1
+      run: ech
