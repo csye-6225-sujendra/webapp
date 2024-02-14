@@ -2,24 +2,52 @@ name: Node.js CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build:
     name: integration
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0.36
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_NAME }}
+          MYSQL_USER: ${{ secrets.DB_USER }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Use Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.15.0'
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Execute exit 1 for failure testing
-      if: failure()
-      run: exit 1
+      - name: Set up environment variables
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+          echo "DB_DIALECT=${{ secrets.DB_DIALECT }}" >> .env
+          echo "DB_POOL_MAX=${{ secrets.DB_POOL_MAX }}" >> .env
+          echo "DB_POOL_MIN=${{ secrets.DB_POOL_MIN }}" >> .env
+          echo "DB_POOL_ACQUIRE=${{ secrets.DB_POOL_ACQUIRE }}" >> .env
+          echo "DB_POOL_IDLE=${{ secrets.DB_POOL_IDLE }}" >> .env
+      
+      - name: Run tests
+        run: npm run test
+
+      - name: Execute exit 1 for failure testing
+        if: failure()
+        run: exit 1
