@@ -27,6 +27,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y mysql-server
         sudo systemctl start mysql
+        sleep 10  # Add a delay
         sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.DB_PASSWORD }}'; FLUSH PRIVILEGES;"
 
     - name: Verify MySQL connection
