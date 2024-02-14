@@ -32,7 +32,6 @@
 
 <h2>Dependencies</h2>
 
-
 <ul>
 <li><a href="https://www.npmjs.com/package/bcrypt">bcrypt</a>: Library for hashing passwords.</li>
 <li><a href="https://www.npmjs.com/package/dotenv">dotenv</a>: Library for loading environment variables from a .env file.</li>
