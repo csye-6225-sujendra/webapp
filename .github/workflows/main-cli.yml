@@ -15,7 +15,6 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: Sujendra@123
           MYSQL_DATABASE: webapp
-          MYSQL_USER: root
           MYSQL_PASSWORD: Sujendra@123
         ports:
           - 3306:3306
