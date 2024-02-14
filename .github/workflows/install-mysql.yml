@@ -1,16 +1,31 @@
 name: MySQL Installation
 
 on:
-  pull_request:
-    branches: [ main ]
+  push:
+    branches: [main]
 
 jobs:
   install-mysql:
     name: Install MySQL
     runs-on: ubuntu-latest
 
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_DIALECT: ${{ secrets.DB_DIALECT }}
+      DB_POOL_MAX: ${{ secrets.DB_POOL_MAX }}
+      DB_POOL_MIN: ${{ secrets.DB_POOL_MIN }}
+      DB_POOL_ACQUIRE: ${{ secrets.DB_POOL_ACQUIRE }}
+      DB_POOL_IDLE: ${{ secrets.DB_POOL_IDLE }}
+
     steps:
       - name: Install MySQL
         run: |
           sudo apt-get update
           sudo apt-get install mysql-server -y
+
+      - name: Set up root user and password
+        run: |
+          echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.DB_PASSWORD }}';" | sudo mysql -u root -p"${{ secrets.DB_PASSWORD }}"
