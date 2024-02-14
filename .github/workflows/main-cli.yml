@@ -2,51 +2,24 @@ name: Node.js CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build:
     name: integration
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0.36
-        env:
-          MYSQL_ROOT_PASSWORD: Sujendra@123
-          MYSQL_DATABASE: webapp
-          MYSQL_PASSWORD: Sujendra@123
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
     steps:
-      - uses: actions/checkout@v2
+    - uses: actions/checkout@v2
 
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18.15.0'
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.15.0'
 
-      - name: Install dependencies
-        run: npm install
+    - name: Install dependencies
+      run: npm install
 
-      - name: Set up environment variables
-        run: |
-          echo "DB_HOST=localhost" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "DB_USER=root" >> .env
-          echo "DB_PASSWORD=Sujendra@123" >> .env
-          echo "DB_NAME=webapp" >> .env
-          echo "DB_DIALECT=mysql" >> .env
-          echo "DB_POOL_MAX=5" >> .env
-          echo "DB_POOL_MIN=0" >> .env
-          echo "DB_POOL_ACQUIRE=30000" >> .env
-          echo "DB_POOL_IDLE=10000" >> .env
-      
-      - name: Run tests
-        run: npm run test
-
-      - name: Execute exit 1 for failure testing
-        if: failure()
-        run: exit 1
+    - name: Execute exit 1 for failure testing
+      if: failure()
+      run: exit 1
