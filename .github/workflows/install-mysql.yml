@@ -20,15 +20,15 @@ jobs:
       DB_POOL_ACQUIRE: ${{ secrets.DB_POOL_ACQUIRE }}
       DB_POOL_IDLE: ${{ secrets.DB_POOL_IDLE }}
 
+
     steps:
-      - name: Install MySQL
-        run: |
-          sudo apt-get update
-          sudo apt-get install mysql-server -y
+    - name: Install MySQL
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y mysql-server
+        sudo systemctl start mysql
+        sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.DB_PASSWORD }}'; FLUSH PRIVILEGES;"
 
-      - name: Start MySQL service
-        run: sudo service mysql start
-
-      - name: Set up root user and password
-        run: |
-          echo "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${{ secrets.DB_PASSWORD }}';" | sudo mysql -u root -p"${{ secrets.DB_PASSWORD }}"
+    - name: Verify MySQL connection
+      run: |
+        mysql -u root -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;"
