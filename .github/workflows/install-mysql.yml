@@ -34,3 +34,10 @@ jobs:
     - name: Verify MySQL connection
       run: |
         mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;"
+
+    - name: Runs Tests
+      run: npm run test
+
+    - name: Execute exit 1 for failure testing
+      if: failure()
+      run: exit 1

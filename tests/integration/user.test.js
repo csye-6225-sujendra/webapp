@@ -2,6 +2,7 @@ const request = require('supertest');
 const app = require('../../server');
 const db = require('../../models/models');
 const bcrypt = require('bcrypt');
+require('dotenv').config();
 
 // Test data
 const testUser = {
