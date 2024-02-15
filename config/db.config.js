@@ -5,6 +5,7 @@ module.exports = {
     USER: process.env.DB_USER,
     PASSWORD: process.env.DB_PASSWORD,
     DB: process.env.DB_NAME,
+    PORT: process.env.DB_PORT,
     dialect: process.env.DB_DIALECT,
     pool: {
       max: parseInt(process.env.DB_POOL_MAX),
