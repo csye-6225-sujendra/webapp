@@ -52,6 +52,7 @@ jobs:
     - name: Runs Tests
       run: npm run test
 
+
     - name: Execute exit 1 for failure testing
       if: failure()
       run: exit 1
