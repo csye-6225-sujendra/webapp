@@ -28,14 +28,13 @@ jobs:
         sudo apt-get install -y mysql-server
         sudo systemctl start mysql
 
-
     - name: Setup MySQL
       run: |
-        sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
-        sudo mysql -e "ALTER USER '${{ env.DB_USER }}'@'localhost' IDENTIFIED BY '${{ env.DB_PASSWORD }}';"
-        sudo mysql -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'localhost';"
-        sudo mysql -e "FLUSH PRIVILEGES;"
+        sudo mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
+        sudo mysql -h 127.0.0.1 -e "ALTER USER '${{ env.DB_USER }}'@'localhost' IDENTIFIED BY '${{ env.DB_PASSWORD }}';"
+        sudo mysql -h 127.0.0.1 -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'localhost';"
+        sudo mysql -h 127.0.0.1 -e "FLUSH PRIVILEGES;"
 
     - name: Verify MySQL connection
       run: |
-        mysql -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} -e "SHOW DATABASES;"
+        mysql -h 127.0.0.1 -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} -e "SHOW DATABASES;"
