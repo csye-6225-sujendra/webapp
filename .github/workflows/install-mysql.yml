@@ -22,15 +22,13 @@ jobs:
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
 
     steps:
-    - name: Install MySQL
+    - name: Start MySQL
       run: |
         sudo systemctl start mysql
 
-    - name: Setup MySQL
+    - name: Create DATABASE
       run: |
         sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
-        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'%';"
-        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "FLUSH PRIVILEGES;"
 
     - name: Verify MySQL connection
       run: |
