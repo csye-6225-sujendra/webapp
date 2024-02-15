@@ -28,9 +28,9 @@ jobs:
 
     - name: Create DATABASE
       run: |
-        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
-        sudo mysqladmin -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" password "${{ secrets.DB_PASSWORD }}"
+        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
+        sudo mysqladmin -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" password "${{ secrets.DB_PASSWORD }}"
 
     - name: Verify MySQL connection
       run: |
-        mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p"${{ env.DB_PASSWORD }}" -e "SHOW DATABASES;"
+        mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;"
