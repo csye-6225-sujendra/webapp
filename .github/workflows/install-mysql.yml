@@ -37,7 +37,10 @@ jobs:
     - name: Verify MySQL connection
       run: |
         mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p"${{ secrets.DB_PASSWORD }}" -e "SHOW DATABASES;"
-
+    
+    - name: Install dependencies
+      run: npm install
+      
     - name: Runs Tests
       run: npm run test
 
