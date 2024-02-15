@@ -20,6 +20,7 @@ jobs:
       DB_POOL_ACQUIRE: ${{ secrets.DB_POOL_ACQUIRE }}
       DB_POOL_IDLE: ${{ secrets.DB_POOL_IDLE }}
       MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      DB_PORT: ${{ secrets.DB_PORT }}
 
     steps:
     - name: Check out code
