@@ -19,22 +19,19 @@ jobs:
       DB_POOL_MIN: ${{ secrets.DB_POOL_MIN }}
       DB_POOL_ACQUIRE: ${{ secrets.DB_POOL_ACQUIRE }}
       DB_POOL_IDLE: ${{ secrets.DB_POOL_IDLE }}
-
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
 
     steps:
     - name: Install MySQL
       run: |
-        sudo apt-get update
-        sudo apt-get install -y mysql-server
         sudo systemctl start mysql
 
     - name: Setup MySQL
       run: |
-        sudo mysql -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
-        sudo mysql -h 127.0.0.1 -e "ALTER USER '${{ env.DB_USER }}'@'localhost' IDENTIFIED BY '${{ env.DB_PASSWORD }}';"
-        sudo mysql -h 127.0.0.1 -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'localhost';"
-        sudo mysql -h 127.0.0.1 -e "FLUSH PRIVILEGES;"
+        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
+        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'%';"
+        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "FLUSH PRIVILEGES;"
 
     - name: Verify MySQL connection
       run: |
-        mysql -h 127.0.0.1 -u ${{ env.DB_USER }} -p${{ env.DB_PASSWORD }} -e "SHOW DATABASES;"
+        mysql -h ${{ env.DB_HOST }} -u ${{ env.DB_USER }} -p"${{ env.MYSQL_ROOT_PASSWORD }}" -e "SHOW DATABASES;"
