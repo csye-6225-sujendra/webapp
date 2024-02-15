@@ -34,6 +34,7 @@ jobs:
       run: |
         sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${{ env.DB_NAME }};"
         sudo mysqladmin -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" password "${{ secrets.DB_PASSWORD }}"
+        sudo mysql -h ${{ env.DB_HOST }} -u root -p"${{ secrets.DB_PASSWORD }}" -e "GRANT ALL PRIVILEGES ON ${{ env.DB_NAME }}.* TO '${{ env.DB_USER }}'@'%';"
 
     - name: Verify MySQL connection
       run: |
