@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --bail",
     "start": "nodemon app.js"
   },
   "author": "Sujendra",
