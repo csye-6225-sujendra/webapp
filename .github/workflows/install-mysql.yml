@@ -48,6 +48,9 @@ jobs:
     - name: Runs Tests
       run: npm run test
 
+    - name: Stop MySQL
+      run: |
+        sudo systemctl stop mysql
 
     - name: Execute exit 1 for failure testing
       if: failure()
