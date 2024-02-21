@@ -1,0 +1,41 @@
+name: Packer Deployment
+ 
+on:
+  pull_request:
+    branches: [main]
+ 
+jobs:
+  build:
+    name: Packer
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+ 
+    - name: Install Packer
+      run: |
+        if ! command -v packer &> /dev/null
+        then
+            curl -O https://releases.hashicorp.com/packer/1.7.4/packer_1.7.4_linux_amd64.zip
+            unzip packer_1.7.4_linux_amd64.zip
+            sudo mv packer /usr/local/bin/packer
+        fi
+        packer --version
+ 
+    - name: create artifact
+      run: |
+        zip -r webapp.zip ./
+ 
+    - name: Initialize Packer
+      run: packer init packer/packer.pkr.hcl
+    
+    - name: Check Formatting
+      run: |
+        if !packer fmt -check packer/packer.pkr.hcl; then
+          echo "Invalid packer format"
+          exit 1
+        fi
+ 
+    - name: Validate Packer Template
+      run: packer validate packer/packer.pkr.hcl
