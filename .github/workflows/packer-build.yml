@@ -1,0 +1,81 @@
+name: packer deployment
+ 
+on:
+  pull_request:
+    branches: [main]
+ 
+jobs:
+  build:
+    name: Packer
+    runs-on: ubuntu-latest
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_DIALECT: ${{ secrets.DB_DIALECT }}
+      DB_POOL_MAX: ${{ secrets.DB_POOL_MAX }}
+      DB_POOL_MIN: ${{ secrets.DB_POOL_MIN }}
+      DB_POOL_ACQUIRE: ${{ secrets.DB_POOL_ACQUIRE }}
+      DB_POOL_IDLE: ${{ secrets.DB_POOL_IDLE }}
+      MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+ 
+    - name: GCloud authentication      
+      id: 'auth'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+ 
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v2'
+ 
+    - name: Setup packer
+      uses: hashicorp/setup-packer@main
+      id: setup
+      with:
+          version: ">= 0.0.1"
+    
+    - name: Set up MySQL server
+      run: |
+        sudo systemctl start mysql
+        sudo systemctl status mysql
+ 
+    - name: Create MySQL  database
+      run: |
+        sudo mysql -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE ${{ secrets.DB_NAME }};"
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: 18.15.0
+ 
+    - name: Install dependencies
+      run: npm install
+ 
+    - name: run test
+      run: npm test
+ 
+    - name: create artifact
+      run: |
+        zip -r webapp.zip ./
+ 
+    - name: Initialize Packer
+      run: packer init packer/packer.pkr.hcl
+    
+    - name: Check Formatting
+      run: |
+        if !packer fmt -check packer/packer.pkr.hcl; then
+          echo "Invalid packer format"
+          exit 1
+        fi
+ 
+    - name: Validate Packer Template
+      run: packer validate packer/packer.pkr.hcl
+    
+ 
+    - name: Deploy packer image
+      run: packer build packer/image.pkr.hcl

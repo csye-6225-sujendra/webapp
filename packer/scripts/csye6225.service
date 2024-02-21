@@ -1,0 +1,26 @@
+[Unit]
+Description=Starts the NodeJS application
+After=network.target
+
+[Service]
+Environment=DB_HOST=localhost
+Environment=DB_USER=root
+Environment=DB_PASSWORD=Sujendra@123
+Environment=DB_NAME=webapp
+Environment=DB_DIALECT=mysql
+Environment=DB_POOL_MAX=5
+Environment=DB_POOL_MIN=0
+Environment=DB_POOL_ACQUIRE=30000
+Environment=DB_POOL_IDLE=10000
+Environment=DB_POOL_IDLE=10000
+
+# Means that the service is a single process
+Type=simple 
+# Group and User that the service will run as
+Group=csye6225
+User=csye6225
+ExecStart=/usr/local/node-v18.15.0/bin/node /tmp/webapp-fork/server.js
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
