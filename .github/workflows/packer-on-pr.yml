@@ -1,4 +1,4 @@
-name: Packer Deployment
+name: Packer Validate
  
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
  
 jobs:
   build:
-    name: Packer
+    name: Packer-Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,9 @@ jobs:
  
     - name: create artifact
       run: |
-        zip -r webapp.zip ./
+        mkdir webapp
+        cp -r * webapp/
+        zip -r webapp.zip webapp/
  
     - name: Initialize Packer
       run: packer init packer/packer.pkr.hcl
