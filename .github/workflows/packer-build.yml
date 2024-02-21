@@ -87,4 +87,4 @@ jobs:
     
  
     - name: Deploy packer image
-      run: packer build packer/image.pkr.hcl
+      run: packer build packer/packer.pkr.hcl
