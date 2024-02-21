@@ -53,6 +53,10 @@ jobs:
       run: |
         sudo mysql -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE ${{ secrets.DB_NAME }};"
       
+    - name: Alter MySQL Root Password
+      run: |
+        sudo mysqladmin -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" password "${{ secrets.DB_PASSWORD }}"
+    
     - name: Setup Node.js
       uses: actions/setup-node@v2
       with:
