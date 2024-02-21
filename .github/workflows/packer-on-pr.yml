@@ -25,9 +25,7 @@ jobs:
  
     - name: create artifact
       run: |
-        mkdir webapp
-        cp -r * webapp/
-        zip -r webapp.zip webapp/
+        zip -r webapp.zip ./
  
     - name: Initialize Packer
       run: packer init packer/packer.pkr.hcl
