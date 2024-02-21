@@ -70,7 +70,7 @@ jobs:
  
     - name: create artifact
       run: |
-        zip -r webapp.zip ./
+        zip -r webapp.zip ./webapp/
  
     - name: Initialize Packer
       run: packer init packer/packer.pkr.hcl
