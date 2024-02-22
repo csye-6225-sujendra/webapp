@@ -22,11 +22,13 @@ Group=csye6225
 User=csye6225
 
 # Set the working directory
-WorkingDirectory=/tmp/
+WorkingDirectory=/tmp/webapp
 
-ExecStart=/usr/local/node-v18.15.0/bin/node /tmp/server.js
+ExecStart=/usr/bin/node /tmp/webapp/server.js
 
 Restart=on-failure
+RestartSec=3
+
 
 [Install]
 WantedBy=multi-user.target
