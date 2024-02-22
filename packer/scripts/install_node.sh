@@ -14,14 +14,5 @@
 
 # node -v
 
-# Download Node.js version 21.4.0
-curl -o- https://nodejs.org/dist/v18.15.0/node-v18.15.0-linux-x64.tar.xz | tar -xJ
-
-# Move the Node.js files to /usr/local
-sudo mv node-v18.15.0-linux-x64 /usr/local/node-v18.15.0
-
-# Add Node.js to the system PATH
-echo 'export PATH=/usr/local/node-v18.15.0/bin:$PATH' | sudo tee -a ~/.bashrc
-
-# Apply the changes to the current shell
-source ~/.bashrc
+sudo dnf module enable nodejs:18 -y
+sudo dnf install -y nodejs
