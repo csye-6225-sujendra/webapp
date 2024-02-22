@@ -6,4 +6,6 @@ sudo systemctl start csye6225
 
 sudo systemctl enable csye6225
 
+sudo systemctl restart csye6225
+
 sudo systemctl status csye6225
