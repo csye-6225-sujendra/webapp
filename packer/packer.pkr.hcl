@@ -69,8 +69,8 @@ build {
 
   provisioner "shell" {
     scripts = [
-      "./packer/scripts/install_node.sh",
       "./packer/scripts/unzip.sh",
+      "./packer/scripts/install_node.sh",
       "./packer/scripts/install_node_dependencies.sh"
       //  "./packer/scripts/run_server.sh"
 
@@ -83,7 +83,7 @@ build {
   }
 
 
-  provisioner "shell" {
-    script = "./packer/scripts/systemd.sh"
-  }
+  // provisioner "shell" {
+  //   script = "./packer/scripts/systemd.sh"
+  // }
 }

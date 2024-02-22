@@ -1,15 +1,20 @@
 #!/bin/bash
 
-echo "Installing unzip package..."
+# sudo dnf -y install unzip
+
+# unzip /opt/webapp.zip -d /opt/
+
+# sudo chown csye6225:csye6225 /opt/server.js
+
+# sudo chmod +x /opt/server.js
+
+# echo "Script execution completed."
+
 sudo dnf -y install unzip
 
-echo "Unzipping webapp.zip..."
-unzip /tmp/webapp.zip -d /tmp/
+unzip /tmp/webapp.zip -d /tmp/webapp/
 
-echo "Changing ownership of /tmp/webapp to csye6225:csye6225..."
-sudo chown csye6225:csye6225 /tmp/webapp
+sudo chown csye6225:csye6225 /tmp/webapp/webapp/server.js
 
-echo "Changing permissions of /tmp/webapp to make it executable..."
-sudo chmod +x /tmp/webapp/server.js
-
+sudo chmod +x /tmp/webapp/webapp/server.js
 echo "Script execution completed."

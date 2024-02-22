@@ -16,10 +16,16 @@ Environment=DB_POOL_IDLE=10000
 
 # Means that the service is a single process
 Type=simple 
+
 # Group and User that the service will run as
 Group=csye6225
 User=csye6225
-ExecStart=/usr/local/node-v18.15.0/bin/node /tmp/webapp-fork/server.js
+
+# Set the working directory
+WorkingDirectory=/tmp/
+
+ExecStart=/usr/local/node-v18.15.0/bin/node /tmp/server.js
+
 Restart=on-failure
 
 [Install]
