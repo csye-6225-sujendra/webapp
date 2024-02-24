@@ -31,7 +31,7 @@ packer {
 }
 
 source "googlecompute" "centos-stream-8" {
-  project_id              = var.gcp_project_id
+  project_id                        = var.gcp_project_id
   source_image_project_id = ["centos-cloud"]
   image_name              = "centos-8-packer-${formatdate("YYYYMMDDHHmmss", timestamp())}"
   source_image_family     = var.gcp_source_image
