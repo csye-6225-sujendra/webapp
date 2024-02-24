@@ -17,8 +17,7 @@ variable "gcp_zone" {
 }
 
 variable "gcp_ssh_username" {
-  type    = string
-  default = "packer"
+  type    = number
 }
 
 packer {
