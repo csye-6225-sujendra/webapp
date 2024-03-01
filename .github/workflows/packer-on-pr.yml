@@ -44,4 +44,4 @@ jobs:
         fi
  
     - name: Validate Packer Template
-      run: packer validate -var 'gcp_credentials_file=gcp_credentials.json' packer/packer.pkr.hcl
+      run: packer validate -var "gcp_credentials_file=gcp_credentials.json" packer/packer.pkr.hcl
