@@ -3,7 +3,7 @@
 # Load variables from variables.pkr.hcl file
 variable "gcp_project_id" {
   type    = string
-  default = "dev-gcp-414923"
+  default = "testing-project-415400"
 }
 
 variable "gcp_source_image" {
@@ -54,7 +54,7 @@ build {
   provisioner "shell" {
     scripts = [
       "./packer/scripts/install_node.sh",
-      "./packer/scripts/install_mysql.sh"
+      //"./packer/scripts/install_mysql.sh"
     ]
   }
 

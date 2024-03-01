@@ -27,7 +27,7 @@ app.all('*', (req, res) => {
 });
 
 app.listen(8080, function () {
-  console.log('Server running on port 3000!');
+  console.log('Server running on port 8080!');
 });
 
 module.exports = app

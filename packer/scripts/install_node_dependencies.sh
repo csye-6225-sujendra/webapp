@@ -4,7 +4,7 @@
 cd /tmp/webapp/
 
 # Install Node.js dependencies using npm
-npm install
+sudo npm install
 
 # Uninstall bcrypt
 npm uninstall bcrypt
