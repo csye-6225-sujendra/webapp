@@ -19,10 +19,6 @@ jobs:
       env:
         gcp_service_account_credentails: ${{ secrets.gcp_service_account_credentails }}
  
-    - name: Print GCP Credentials
-      run: |
-        cat gcp_credentials.json
-
     - name: Install Packer
       run: |
         if ! command -v packer &> /dev/null
@@ -48,4 +44,4 @@ jobs:
         fi
  
     - name: Validate Packer Template
-      run: packer validate -var "gcp_credentials_file=./gcp_credentials.json" packer/packer.pkr.hcl
+      run: packer validate packer/packer.pkr.hcl
