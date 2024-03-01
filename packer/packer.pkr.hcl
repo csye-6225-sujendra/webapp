@@ -21,6 +21,11 @@ variable "gcp_ssh_username" {
   default = "packer"
 }
 
+variable "gcp_credentials_file" {
+  type    = string
+  default = "./packer/packer-svc.json"
+}
+
 packer {
   required_plugins {
     googlecompute = {
@@ -45,7 +50,7 @@ source "googlecompute" "centos-stream-8" {
     environment = "dev"
   }
   ssh_username     = "packer"
-  credentials_file = "./packer/packer-svc.json"
+  credentials_file = var.gcp_credentials_file
 }
 
 build {

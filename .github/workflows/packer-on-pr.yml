@@ -12,6 +12,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
+    - name: Set up GCP Credentials
+      run: |
+        echo "${{ secrets.gcp_service_account_credentails }}" > gcp_credentials.json
+      env:
+        gcp_service_account_credentails: ${{ secrets.gcp_service_account_credentails }}
  
     - name: Install Packer
       run: |
@@ -38,4 +44,4 @@ jobs:
         fi
  
     - name: Validate Packer Template
-      run: packer validate packer/packer.pkr.hcl
+      run: packer validate -var 'gcp_credentials_file=gcp_credentials.json' packer/packer.pkr.hcl
