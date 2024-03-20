@@ -76,6 +76,10 @@ build {
     ]
   }
 
+  provisioner "shell" {
+    script = "./packer/scripts/install_ops_agent.sh"
+  }
+
   provisioner "file" {
     source      = "./packer/scripts/csye6225.service"
     destination = "/tmp/csye6225.service"
@@ -85,4 +89,5 @@ build {
   provisioner "shell" {
     script = "./packer/scripts/systemd.sh"
   }
+
 }
