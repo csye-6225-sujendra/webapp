@@ -2,6 +2,13 @@ const express = require('express');
 const app = express();
 const db = require("./models/models");
 const api = require("./routes/routes");
+const { v4: uuidv4 } = require('uuid');
+const logger = require('./logger'); // Import logger module
+
+const addSpanId = (req, res, next) => {
+  req.spanId = uuidv4(); // Generate unique ID for each request
+  next();
+};
 
 const addCacheControlHeader = (req, res, next) => {
   res.header('Cache-Control', 'no-store, no-cache');
@@ -10,14 +17,16 @@ const addCacheControlHeader = (req, res, next) => {
 
 app.use(express.json())
 
+app.use(addSpanId);
+
 app.use(addCacheControlHeader);
 
 db.initializeDatabase()
   .then(() => {
-    console.log("Database initialized and models synced.");
+    logger.info("Database initialized and models synced."); // Log success message
   })
   .catch((err) => {
-    console.log("Failed to initialize database and sync models: " + err.message);
+    logger.error("Failed to initialize database and sync models: " + err.message); // Log error message
   });
 
 app.use("/", api);
@@ -27,7 +36,7 @@ app.all('*', (req, res) => {
 });
 
 app.listen(8080, function () {
-  console.log('Server running on port 8080!');
+  logger.info('Server running on port 8080!'); // Log server start message
 });
 
-module.exports = app
+module.exports = app;
