@@ -3,10 +3,12 @@ const { v4: uuidv4 } = require('uuid');
 
 // Define custom log format
 const myFormat = winston.format.printf(({ level, message, timestamp, spanId, traceId, httpRequest }) => {
+  // Map Winston severity to Cloud Logging severity
+
   const logObject = {
-    severity: level.toUpperCase(),
+    severity: level.toUpperCase(), // Use mapped severity or default to upper case
     message: message,
-    times: timestamp,
+    timestamp: timestamp,
     "logging.googleapis.com/insertId": uuidv4(), // Generate unique insert ID using UUID
     "logging.googleapis.com/spanId": spanId,
     "logging.googleapis.com/trace": traceId,
@@ -23,7 +25,17 @@ const myFormat = winston.format.printf(({ level, message, timestamp, spanId, tra
 
 // Create a custom Winston transport for structured logging
 const structuredLogger = winston.createLogger({
-  level: 'info', // Default logging level
+  level: 'debug', // Default logging level
+  levels: {
+    error: 0,
+    warn: 1,
+    info: 2,
+    http: 3,
+    verbose: 4,
+    debug: 5,
+    silly: 6
+  },
+  //levels: winston.config.syslog.levels, // Use syslog levels to ensure compatibility with Cloud Logging
   format: winston.format.combine(
     winston.format.timestamp({
       format: 'YYYY-MM-DDTHH:mm:ss.SSSZZ' // Format to match the Ops Agent's expected timestamp format

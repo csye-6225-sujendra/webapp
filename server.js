@@ -23,10 +23,10 @@ app.use(addCacheControlHeader);
 
 db.initializeDatabase()
   .then(() => {
-    logger.info("Database initialized and models synced."); // Log success message
+    logger.info("Database initialized and models synced.", { level: 'info' }); // Log success message
   })
   .catch((err) => {
-    logger.error("Failed to initialize database and sync models: " + err.message); // Log error message
+    logger.error("Failed to initialize database and sync models: " + err.message, { level: 'error' }); // Log error message
   });
 
 app.use("/", api);
@@ -36,7 +36,7 @@ app.all('*', (req, res) => {
 });
 
 app.listen(8080, function () {
-  logger.info('Server running on port 8080!'); // Log server start message
+  logger.info('Server running on port 8080!', { level: 'info' }); // Log server start message
 });
 
 module.exports = app;

@@ -19,14 +19,14 @@ exports.authenticate = async (req, res, next) => {
     const _user = await user.findOne({ where: { username } });
 
     if (!_user || !(await bcrypt.compare(password, _user.password))) {
-      logger.warn('Authentication failed: User not found or password does not match', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], username });
+      logger.warn('Authentication failed: User not found or password does not match', {httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], username });
       return res.status(401).send();
     }
 
     req.user = { id: _user.dataValues.id };
     next();
   } catch (error) {
-    logger.error('Error during authentication', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
+    logger.error('Error during authentication', {error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
     return res.status(503).send();
   }
 }
@@ -46,7 +46,7 @@ exports.checks = {
       logger.warn('Invalid payload: Content length is not zero', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
       res.status(400).send()
     } else if (Object.keys(req.query).length > 0) {
-      logger.warn('Invalid payload: Query parameters present', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
+      logger.warn('Invalid payload: Query parameters present',  { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
       res.status(400).send()
     } else {
       next()
@@ -58,7 +58,7 @@ exports.userManagement = {
   healthcheck: async (req, res) => {
     try {
       await database.authenticate()
-      logger.info('Database connection successful', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
+      logger.info('Database connection successful', {  httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
       res.status(200).send()
     } catch (error) {
       logger.error('Database connection error', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
@@ -70,11 +70,13 @@ exports.userManagement = {
     const self = this;
     try {
       if (Object.keys(req.query).length > 0) {
+        logger.debug('Received query parameters in createUser method', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
         return res.status(400).send()
       }
 
       if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
         if (!req.body.username || !req.body.password || !req.body.first_name || !req.body.last_name) {
+          logger.debug('Invalid payload: Required fields missing in createUser method', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
           return res.status(400).send();
         } else {
           const allowedFields = ["first_name", "last_name", "password", "username"]
@@ -85,7 +87,7 @@ exports.userManagement = {
           }
 
           if (!validator.isEmail(req.body.username)) {
-            logger.warn('Invalid email format', { email: req.body.username, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
+            logger.debug('Invalid email format', { email: req.body.username, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
             return res.status(400).send();
           }
 
