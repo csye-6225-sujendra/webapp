@@ -147,46 +147,51 @@ exports.userManagement = {
   updateUser: async (req, res) => {
     const self = this;
     try {
-      if (Object.keys(req.query).length > 0 || req.headers['content-length'] && req.headers['content-length'] !== "0") {
-        logger.warn('Invalid request: Query parameters present or non-zero content length', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
-        return res.status(400).send()
-      }
-
-      if (!req.body.password || !req.body.first_name || !req.body.last_name) {
+      // Log the incoming request for debugging
+      logger.info('Update user request received', { body: req.body, userId: req.user.id, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
+  
+      if (Object.keys(req.query).length > 0) {
         return res.status(400).send();
       }
-
-      const allowedFields = ["first_name", "last_name", "password"]
-      const checkFields = self.userManagement.allowedFields(allowedFields, req)
-      if (checkFields.length > 0) {
-        logger.warn('Invalid payload: Invalid field(s) present', { fields: checkFields, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
-        return res.status(400).send()
-      }
-
-      const { password, first_name, last_name } = req.body
-      const userId = req.user.id
-
-      const existingUser = await user.findOne({ where: { id: userId } });
-
-      if (!existingUser) {
-        return res.status(400).send()
-      }
-
-      const hashedPassword = await self.userManagement.hashpass(password)
-      const result = await user.update(
-        {
-          first_name: first_name,
-          last_name: last_name,
-          password: hashedPassword,
-        },
-        {
-          where: { id: userId },
+  
+      if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
+        if (!req.body.password || !req.body.first_name || !req.body.last_name) {
+          return res.status(400).send();
+        } else {
+          const allowedFields = ["first_name", "last_name", "password"];
+          const checkFields = self.userManagement.allowedFields(allowedFields, req);
+          if (checkFields.length > 0) {
+            return res.status(400).send();
+          }
+  
+          const { password, first_name, last_name } = req.body;
+          const userId = req.user.id;
+  
+          const existingUser = await user.findOne({ where: { id: userId } });
+  
+          if (!existingUser) {
+            return res.status(400).send();
+          }
+  
+          const hashedPassword = await self.userManagement.hashpass(password);
+          console.log("reached here");
+          const result = await user.update(
+            {
+              first_name: first_name,
+              last_name: last_name,
+              password: hashedPassword,
+            },
+            {
+              where: { id: userId },
+            }
+          );
+  
+          logger.info('User updated successfully', { userId: req.user.id, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
+          return res.status(204).send();
         }
-      );
-
-      logger.info('User updated successfully', { userId: req.user.id, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
-      return res.status(204).send()
+      }
     } catch (error) {
+      //console.log(error);
       logger.error('Error updating user', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
       return res.status(503).send();
     }
