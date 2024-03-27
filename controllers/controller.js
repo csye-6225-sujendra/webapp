@@ -2,6 +2,9 @@ const { database, user } = require("../models/models");
 const bcrypt = require('bcrypt');
 const validator = require('validator');
 const logger = require('../logger');
+const { PubSub } = require('@google-cloud/pubsub');
+const pubSubClient = new PubSub();
+const { v4: uuidv4 } = require('uuid');
 
 exports.authenticate = async (req, res, next) => {
   try {
@@ -19,14 +22,14 @@ exports.authenticate = async (req, res, next) => {
     const _user = await user.findOne({ where: { username } });
 
     if (!_user || !(await bcrypt.compare(password, _user.password))) {
-      logger.warn('Authentication failed: User not found or password does not match', {httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], username });
+      logger.warn('Authentication failed: User not found or password does not match', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], username });
       return res.status(401).send();
     }
 
     req.user = { id: _user.dataValues.id };
     next();
   } catch (error) {
-    logger.error('Error during authentication', {error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
+    logger.error('Error during authentication', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
     return res.status(503).send();
   }
 }
@@ -46,11 +49,21 @@ exports.checks = {
       logger.warn('Invalid payload: Content length is not zero', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
       res.status(400).send()
     } else if (Object.keys(req.query).length > 0) {
-      logger.warn('Invalid payload: Query parameters present',  { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
+      logger.warn('Invalid payload: Query parameters present', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
       res.status(400).send()
     } else {
       next()
     }
+  },
+
+  verifyUser: async (req, res, next) => {
+    const userId = req.user.id;
+    const _user = await user.findOne({ where: { id: userId } });
+    if (!_user || !_user.verified) {
+      return res.status(403).json({ error: 'User account not verified' });
+    }
+
+    next();
   }
 }
 
@@ -58,7 +71,7 @@ exports.userManagement = {
   healthcheck: async (req, res) => {
     try {
       await database.authenticate()
-      logger.info('Database connection successful', {  httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
+      logger.info('Database connection successful', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
       res.status(200).send()
     } catch (error) {
       logger.error('Database connection error', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
@@ -68,6 +81,7 @@ exports.userManagement = {
 
   createUser: async (req, res) => {
     const self = this;
+    const domain = req.headers.host; 
     try {
       if (Object.keys(req.query).length > 0) {
         logger.debug('Received query parameters in createUser method', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
@@ -104,10 +118,36 @@ exports.userManagement = {
             username: username,
             password: hashedPassword,
             first_name: first_name,
-            last_name: last_name
+            last_name: last_name,
+            verified: false,
+            verificationToken: uuidv4(), // add this line
+            //tokenExpiryDate: Date.now() + 120000 // 2 minutes from now
           })
 
+          // Prepare the payload with relevant information
+          const payload = {
+            userId: newUser.id,
+            username: newUser.username,
+            firstName: newUser.first_name,
+            lastName: newUser.last_name,
+            email: newUser.username, // Assuming the username is the email
+            verified: newUser.verified,
+            verificationToken: newUser.verificationToken,
+            //tokenExpiryDate: newUser.tokenExpiryDate,
+            verificationLink : `http://${domain}/verify?token=${newUser.verificationToken}`
+          };
+
+          console.log(payload,"payload")
+          // Publish the message to the Pub/Sub topic
+          const dataBuffer = Buffer.from(JSON.stringify(payload));
+          const messageId = await pubSubClient
+            .topic('verify_email')
+            .publish(dataBuffer);
+
+          console.log(`Message ${messageId} published.`);
+
           const userResponse = newUser.toJSON();
+          userResponse.verificationLink = payload.verificationLink
           delete userResponse.password;
 
           logger.info('User created successfully', { username: req.body.username, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
@@ -115,7 +155,9 @@ exports.userManagement = {
         }
       }
     } catch (error) {
+      console.log(error)
       logger.error('Error creating user', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
+      
       return res.status(503).send()
     }
   },
@@ -151,11 +193,11 @@ exports.userManagement = {
     try {
       // Log the incoming request for debugging
       logger.info('Update user request received', { body: req.body, userId: req.user.id, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
-  
+
       if (Object.keys(req.query).length > 0) {
         return res.status(400).send();
       }
-  
+
       if (req.headers['content-length'] && req.headers['content-length'] !== "0") {
         if (!req.body.password || !req.body.first_name || !req.body.last_name) {
           return res.status(400).send();
@@ -165,16 +207,16 @@ exports.userManagement = {
           if (checkFields.length > 0) {
             return res.status(400).send();
           }
-  
+
           const { password, first_name, last_name } = req.body;
           const userId = req.user.id;
-  
+
           const existingUser = await user.findOne({ where: { id: userId } });
-  
+
           if (!existingUser) {
             return res.status(400).send();
           }
-  
+
           const hashedPassword = await self.userManagement.hashpass(password);
           console.log("reached here");
           const result = await user.update(
@@ -187,7 +229,7 @@ exports.userManagement = {
               where: { id: userId },
             }
           );
-  
+
           logger.info('User updated successfully', { userId: req.user.id, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'], endpoint: req.originalUrl });
           return res.status(204).send();
         }
@@ -210,5 +252,19 @@ exports.userManagement = {
     const receivedFields = Object.keys(req.body);
     const invalidFields = receivedFields.filter(field => !_allowedFields.includes(field));
     return invalidFields
+  },
+
+  verifyEmail: async function (req, res) {
+    const { token } = req.query;
+    const _user = await user.findOne({ where: { verificationToken: token } });
+    if (!_user) {
+      return res.status(400).json({ error: 'Invalid verification token' });
+    }
+    if (_user.tokenExpiryDate < Date.now()) {
+      return res.status(400).json({ error: 'Verification token has expired' });
+    }
+    _user.verified = true;
+    await _user.save();
+    res.send('Your account has been verified');
   }
 }

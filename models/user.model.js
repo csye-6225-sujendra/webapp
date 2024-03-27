@@ -31,6 +31,19 @@ module.exports = (database, Sequelize) => {
                 isEmail: true,
             },
         },
+        verified: {
+            type: Sequelize.BOOLEAN,
+            allowNull: false,
+            defaultValue: false
+        },
+        verificationToken: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        tokenExpiryDate: {
+            type: Sequelize.DATE,
+            allowNull: true,
+        }
     }, {
         //timestamps: false, // Disable automatic timestamp fields createdAt and updatedAt
         updatedAt: 'account_updated',
