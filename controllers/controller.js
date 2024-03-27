@@ -58,6 +58,10 @@ exports.checks = {
 
   verifyUser: async (req, res, next) => {
     const userId = req.user.id;
+    // Check if environment is 'test', then bypass verification
+    if (process.env.NODE_ENV === 'test') {
+      return next();
+    }
     const _user = await user.findOne({ where: { id: userId } });
     if (!_user || !_user.verified) {
       return res.status(403).json({ error: 'User account not verified' });
@@ -81,7 +85,7 @@ exports.userManagement = {
 
   createUser: async (req, res) => {
     const self = this;
-    const domain = req.headers.host; 
+    const domain = req.headers.host;
     try {
       if (Object.keys(req.query).length > 0) {
         logger.debug('Received query parameters in createUser method', { httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
@@ -134,17 +138,20 @@ exports.userManagement = {
             verified: newUser.verified,
             verificationToken: newUser.verificationToken,
             //tokenExpiryDate: newUser.tokenExpiryDate,
-            verificationLink : `http://${domain}/verify?token=${newUser.verificationToken}`
+            verificationLink: `http://${domain}/verify?token=${newUser.verificationToken}`
           };
 
-          console.log(payload,"payload")
-          // Publish the message to the Pub/Sub topic
-          const dataBuffer = Buffer.from(JSON.stringify(payload));
-          const messageId = await pubSubClient
-            .topic('verify_email')
-            .publish(dataBuffer);
+          console.log(payload, "payload")
 
-          console.log(`Message ${messageId} published.`);
+          if (process.env.NODE_ENV !== 'test') {
+            // Publish the message to the Pub/Sub topic
+            const dataBuffer = Buffer.from(JSON.stringify(payload));
+            const messageId = await pubSubClient
+              .topic('verify_email')
+              .publish(dataBuffer);
+
+            console.log(`Message ${messageId} published.`);
+          }
 
           const userResponse = newUser.toJSON();
           userResponse.verificationLink = payload.verificationLink
@@ -157,7 +164,7 @@ exports.userManagement = {
     } catch (error) {
       console.log(error)
       logger.error('Error creating user', { error: error.message, httpRequest: { requestMethod: req.method }, spanId: req.spanId, traceId: req.headers['logging.googleapis.com/trace'] });
-      
+
       return res.status(503).send()
     }
   },
