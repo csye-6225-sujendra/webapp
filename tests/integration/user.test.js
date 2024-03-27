@@ -58,13 +58,18 @@ describe('User API Endpoints', () => {
             expect(response.body).toMatchObject({
                 username: testUser.username,
                 first_name: testUser.first_name,
-                last_name: testUser.last_name
+                last_name: testUser.last_name,
+                verified:false
             });
 
             // Check if the password is hashed
             const createdUser = await db.user.findOne({ where: { username: testUser.username } });
             expect(createdUser).toBeDefined();
             expect(bcrypt.compareSync(testUser.password, createdUser.password)).toBe(true);
+
+            // Update the verified field to true
+            createdUser.verified = true;
+            await createdUser.save();
         });
 
         it('should retrieve user details and validate existence', async () => {
