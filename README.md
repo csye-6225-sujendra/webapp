@@ -34,11 +34,10 @@
 <h2>Dependencies</h2>
 
 
+
 <ul>
 <li><a href="https://www.npmjs.com/package/bcrypt">bcrypt</a>: Library for hashing passwords.</li>
 <li><a href="https://www.npmjs.com/package/dotenv">dotenv</a>: Library for loading environment variables from a .env file.</li>
 <li><a href="https://www.npmjs.com/package/express">express</a>: Web framework for Node.js.</li>
 <li><a href="https://www.npmjs.com/package/morgan">morgan</a>: HTTP request logger middleware for Node.js.</li>
 <li><a href="https://www.npmjs.com/package/mysql2">mysql2</a>: MySQL cli
-
-
