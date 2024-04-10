@@ -135,7 +135,7 @@ jobs:
           gcloud compute instance-templates create instance-template1 \
           --project=${{env.Project_ID}} \
           --description=Creating\ Regional\ Compute\ Instance\ Template \
-          --instance-template-region="${{env.REGION}}"\
+          --instance-template-region=${{env.REGION}}\
           --machine-type=${{env.VIRTUAL_MACHINE_TYPE}} \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
           --metadata=startup-script=${{env.STARTUP_SCRIPT}} \
