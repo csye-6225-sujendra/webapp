@@ -144,7 +144,7 @@ jobs:
           --scopes=${{env.SCOPES}} \
           --region=${{env.REGION}} \
           --tags=${{env.VM_TAG}} \
-          --create-disk=auto-delete=${{env.IT_DISK_AUTO_DELETE}},boot=${{env.IT_DISK_BOOT}},device-name=${{env.DEVICE_NAME}},image=${{ env.NEW_IMAGE }},kms-key=${{env.KMS_KEY_SELF_LINK}},mode=rw,size=${{env.VIRTUAL_MACHINE_DISK_SIZE_GB}},type=${env.VIRTUAL_MACHINE_DISK_TYPE}} \
+          --create-disk=auto-delete=${{env.IT_DISK_AUTO_DELETE}},boot=${{env.IT_DISK_BOOT}},device-name=${{env.DEVICE_NAME}},image=${{ env.NEW_IMAGE }},kms-key=${{env.KMS_KEY_SELF_LINK}},mode=rw,size=${{env.VIRTUAL_MACHINE_DISK_SIZE_GB}},type=${{env.VIRTUAL_MACHINE_DISK_TYPE}} \
           --no-shielded-secure-boot \
           --shielded-vtpm \
           --shielded-integrity-monitoring \
