@@ -135,7 +135,7 @@ jobs:
           gcloud compute instance-templates create instance-template1 \
           --project=${{env.Project_ID}} \
           --description=Creating\ Regional\ Compute\ Instance\ Template \
-          --instance-template-region=${{env.REGION}}\
+          --instance-template-region="$REGION"\
           --machine-type=${{env.VIRTUAL_MACHINE_TYPE}} \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
           --metadata=startup-script=${{env.STARTUP_SCRIPT}} \
@@ -143,7 +143,7 @@ jobs:
           --provisioning-model=${{env.PROVISIONING_MODEL}} \
           --service-account=${{env.SERVICE_ACCOUNT}} \
           --scopes=${{env.SCOPES}} \
-          --region=${{env.REGION}} \
+          --region="$REGION" \
           --tags=${{env.VM_TAG}} \
           --create-disk=auto-delete=${{env.IT_DISK_AUTO_DELETE}},boot=${{env.IT_DISK_BOOT}},device-name=${{env.DEVICE_NAME}},image=${{ env.NEW_IMAGE }},kms-key=${{env.KMS_KEY_SELF_LINK}},mode=rw,size=${{env.VIRTUAL_MACHINE_DISK_SIZE_GB}},type=${{env.VIRTUAL_MACHINE_DISK_TYPE}} \
           --no-shielded-secure-boot \
@@ -160,8 +160,8 @@ jobs:
 
       run: |
         gcloud compute instance-groups managed set-instance-template  ${{ env.INSTANCE_GROUP_NAME }} \
-        --region=${{ env.ZONE_OR_REGION }} \
         --template=projects/${{ env.PROJECT_ID }}/regions/${{ env.ZONE_OR_REGION }}/instanceTemplates/${{env.INSTANCE_TEMPLATE_NAME}} \
+        --region=${{ env.ZONE_OR_REGION }} \
         --project=${{ env.PROJECT_ID }}
 
     - name: Start rolling update
