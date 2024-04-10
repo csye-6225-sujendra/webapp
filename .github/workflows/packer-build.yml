@@ -133,18 +133,18 @@ jobs:
       run: |
           gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
           gcloud compute instance-templates create instance-template1 \
-          --project=$Project_ID \
+          --project=${{env.Project_ID}} \
           --description=Creating\ Regional\ Compute\ Instance\ Template \
-          --machine-type=e2-medium \
+          --machine-type=${{env.VIRTUAL_MACHINE_TYPE}} \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
-          --metadata=startup-script=\#\!/bin/bash$'\n'$'\n'\#\ Navigate\ to\ the\ webapp\ directory$'\n'cd\ /tmp/webapp$'\n'$'\n'\#\ Create\ the\ .env\ file\ with\ the\ required\ values$'\n'cat\ \<\<EOF\ \>\ .env$'\n'DB_HOST=${{env.SS_DB_HOST}}'\n'DB_USER=${{env.SS_DB_USER}}'\n'DB_PASSWORD=${{env.SS_DB_PASSWORD}}'\n'DB_NAME=${{env.SS_DB_NAME}}'\n'DB_PORT=3306$'\n'DB_DIALECT=mysql$'\n'DB_POOL_MAX=10$'\n'DB_POOL_MIN=2$'\n'DB_POOL_ACQUIRE=30000$'\n'DB_POOL_IDLE=10000$'\n'EOF$'\n'$'\n'\#\ Set\ the\ correct\ permissions\ for\ the\ .env\ file$'\n'chmod\ 655\ /tmp/webapp/.env$'\n'$'\n'\#\ Start\ or\ restart\ the\ service$'\n'sudo\ systemctl\ start\ csye6225$'\n' \
-          --maintenance-policy=$MAINTENANCE_POLICY \
-          --provisioning-model=$PROVISIONING_MODEL \
-          --service-account=$SERVICE_ACCOUNT \
-          --scopes=$SCOPES \
-          --region=$REGION \
-          --tags=$VM_TAG \
-          --create-disk=auto-delete=$IT_DISK_AUTO_DELETE,boot=$IT_DISK_BOOT,device-name=$DEVICE_NAME,image=${{ env.NEW_IMAGE }},kms-key=$KMS_KEY_SELF_LINK,mode=rw,size=$VIRTUAL_MACHINE_DISK_SIZE_GB,type=$VIRTUAL_MACHINE_DISK_TYPE \
+          --metadata=startup-script=${{env.STARTUP_SCRIPT}} \
+          --maintenance-policy=${{env.MAINTENANCE_POLICY}} \
+          --provisioning-model=${{env.PROVISIONING_MODEL}} \
+          --service-account=${{env.SERVICE_ACCOUNT}} \
+          --scopes=${{env.SCOPES}} \
+          --region=${{env.REGION}} \
+          --tags=${{env.VM_TAG}} \
+          --create-disk=auto-delete=${{env.IT_DISK_AUTO_DELETE}},boot=${{env.IT_DISK_BOOT}},device-name=${{env.DEVICE_NAME}},image=${{ env.NEW_IMAGE }},kms-key=${{env.KMS_KEY_SELF_LINK}},mode=rw,size=${{env.VIRTUAL_MACHINE_DISK_SIZE_GB}},type=${env.VIRTUAL_MACHINE_DISK_TYPE}} \
           --no-shielded-secure-boot \
           --shielded-vtpm \
           --shielded-integrity-monitoring \
