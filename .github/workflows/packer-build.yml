@@ -1,7 +1,7 @@
 name: Packer Deployment
  
 on:
-  push:
+  pull_request:
     branches: [main]
  
 jobs:
@@ -88,3 +88,28 @@ jobs:
  
     - name: Deploy packer image
       run: packer build packer/packer.pkr.hcl
+
+    - name: Packer build
+      id: build
+      run: packer build packer/packer.pkr.hcl
+
+    - name: Create new instance template version
+      run: |
+        gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
+        gcloud beta compute instance-templates create webapp-template-20240410-074205 --project=testing-project-415400 --description=Creating\ Regional\ Compute\ Instance\ Template --machine-type=e2-medium --network-interface=network-tier=PREMIUM,subnet=webapp --instance-template-region=projects/testing-project-415400/regions/us-east1 --metadata=startup-script=\#\!/bin/bash$'\n'$'\n'\#\ Navigate\ to\ the\ webapp\ directory$'\n'cd\ /tmp/webapp$'\n'$'\n'\#\ Create\ the\ .env\ file\ with\ the\ required\ values$'\n'cat\ \<\<EOF\ \>\ .env$'\n'DB_HOST=10.158.0.2$'\n'DB_USER=root$'\n'DB_PASSWORD=\*2r\}s\*Qrst1kR77G$'\n'DB_NAME=webapp$'\n'DB_PORT=3306$'\n'DB_DIALECT=mysql$'\n'DB_POOL_MAX=10$'\n'DB_POOL_MIN=2$'\n'DB_POOL_ACQUIRE=30000$'\n'DB_POOL_IDLE=10000$'\n'EOF$'\n'$'\n'\#\ Set\ the\ correct\ permissions\ for\ the\ .env\ file$'\n'chmod\ 655\ /tmp/webapp/.env$'\n'$'\n'\#\ Start\ or\ restart\ the\ service$'\n'sudo\ systemctl\ start\ csye6225$'\n' --maintenance-policy=MIGRATE --provisioning-model=STANDARD --service-account=vm-service-account@testing-project-415400.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --region=us-east1 --tags=deny-ssh,allow-ssh,allow-health-check,allow-http --create-disk=auto-delete=yes,boot=yes,device-name=persistent-disk-0,image=projects/testing-project-415400/global/images/centos-8-packer-20240409111414,kms-key=projects/testing-project-415400/locations/us-east1/keyRings/rings-of-kms-five/cryptoKeys/vm-crypto-key,mode=rw,size=100,type=pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+
+    - name: Configure instance group with new template
+      run: |
+        gcloud compute instance-groups managed set-instance-template webapp-igm --region=us-east1 --template=webapp-instance-template-version3 --project=testing-project-415400
+
+    - name: Start rolling update
+      run: |
+        gcloud compute instance-groups managed rolling-action start-update webapp-igm --version=template="webapp-instance-template-version3" --max-surge=5 --region=us-east1 --project=testing-project-415400
+
+    - name: Monitor instance group update
+      run: |
+        status="RUNNING"
+        while [ "$status" != "ROLLOUT_DONE" ]; do
+        status=$(gcloud compute instance-groups managed describe webapp-igm --region=us-east1 --project=testing-project-415400 --format="value(status.versionTarget.isReached)")
+        sleep 10
+        done
