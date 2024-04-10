@@ -101,22 +101,81 @@ jobs:
       run: echo $PACKER_BUILD_IMAGE_ID
 
     - name: Create new instance template version
+      env:
+            Project_ID: ${{secrets.Project_ID}}
+            IT_TEMPLATE_DESCRIPTION : ${{secrets.IT_TEMPLATE_DESCRIPTION}} 
+            VIRTUAL_MACHINE_TYPE: ${{secrets.VIRTUAL_MACHINE_TYPE}}
+            REGION: ${{secrets.REGION}}
+            STARTUP_SCRIPT: ${{ secrets.STARTUP_SCRIPT }}
+            MAINTENANCE_POLICY: ${{secrets.MAINTENANCE_POLICY}}
+            PROVISIONING_MODEL: ${{secrets.PROVISIONING_MODEL}}
+            SERVICE_ACCOUNT: ${{secrets.SERVICE_ACCOUNT}}
+            SCOPES: ${{secrets.SCOPES}}
+            VM_TAG: ${{secrets.VM_TAG }}
+            VIRTUAL_MACHINE_IMAGE: ${{env.PACKER_BUILD_IMAGE_ID}}
+            VIRTUAL_MACHINE_DISK_SIZE_GB: ${{secrets.VIRTUAL_MACHINE_DISK_SIZE_GB}}
+            VIRTUAL_MACHINE_DISK_TYPE: ${{secrets.VIRTUAL_MACHINE_DISK_TYPE}}
+            IT_DISK_AUTO_DELETE: ${{ secrets.IT_DISK_AUTO_DELETE}}
+            IT_DISK_BOOT: ${{secrets.IT_DISK_BOOT}}
+            KMS_KEY_SELF_LINK: ${{secrets.KMS_KEY_SELF_LINK}}
+            DEVICE_NAME:  ${{secrets.DEVICE_NAME}}
       run: |
           gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
-          gcloud compute instance-templates create webapp-template-20240410-109999 --project=testing-project-415400 --description=Creating\ Regional\ Compute\ Instance\ Template --machine-type=e2-medium --network-interface=network-tier=PREMIUM,subnet=webapp --metadata=startup-script=\#\!/bin/bash$'\n'$'\n'\#\ Navigate\ to\ the\ webapp\ directory$'\n'cd\ /tmp/webapp$'\n'$'\n'\#\ Create\ the\ .env\ file\ with\ the\ required\ values$'\n'cat\ \<\<EOF\ \>\ .env$'\n'DB_HOST=10.166.0.2$'\n'DB_USER=root$'\n'DB_PASSWORD=uCP\(yz2\(e5\{Q\*g3A$'\n'DB_NAME=webapp$'\n'DB_PORT=3306$'\n'DB_DIALECT=mysql$'\n'DB_POOL_MAX=10$'\n'DB_POOL_MIN=2$'\n'DB_POOL_ACQUIRE=30000$'\n'DB_POOL_IDLE=10000$'\n'EOF$'\n'$'\n'\#\ Set\ the\ correct\ permissions\ for\ the\ .env\ file$'\n'chmod\ 655\ /tmp/webapp/.env$'\n'$'\n'\#\ Start\ or\ restart\ the\ service$'\n'sudo\ systemctl\ start\ csye6225$'\n' --maintenance-policy=MIGRATE --provisioning-model=STANDARD --service-account=vm-service-account@testing-project-415400.iam.gserviceaccount.com --scopes=https://www.googleapis.com/auth/cloud-platform --region=us-east1 --tags=deny-ssh,allow-ssh,allow-health-check,allow-http --create-disk=auto-delete=yes,boot=yes,device-name=persistent-disk-0,image=${{ env.NEW_IMAGE }},kms-key=projects/testing-project-415400/locations/us-east1/keyRings/rings-of-kms-eight/cryptoKeys/vm-crypto-key,mode=rw,size=100,type=pd-balanced --no-shielded-secure-boot --shielded-vtpm --shielded-integrity-monitoring --reservation-affinity=any
+          gcloud compute instance-templates create instance-template1 \
+          --project=$Project_ID \
+          --description=Creating\ Regional\ Compute\ Instance\ Template \
+          --machine-type=e2-medium \
+          --network-interface=network-tier=PREMIUM,subnet=webapp \
+          --metadata=startup-script=$STARTUP_SCRIPT \
+          --maintenance-policy=$MAINTENANCE_POLICY \
+          --provisioning-model=$PROVISIONING_MODEL \
+          --service-account=$SERVICE_ACCOUNT \
+          --scopes=$SCOPES \
+          --region=$REGION \
+          --tags=$VM_TAG \
+          --create-disk=auto-delete=$IT_DISK_AUTO_DELETE,boot=$IT_DISK_BOOT,device-name=$DEVICE_NAME,image=${{ env.NEW_IMAGE }},kms-key=$KMS_KEY_SELF_LINK,mode=rw,size=$VIRTUAL_MACHINE_DISK_SIZE_GB,type=$VIRTUAL_MACHINE_DISK_TYPE \
+          --no-shielded-secure-boot \
+          --shielded-vtpm \
+          --shielded-integrity-monitoring \
+          --reservation-affinity=any
 
     - name: Configure instance group with new template
+      env:
+          INSTANCE_GROUP_NAME: "webapp-igm"
+          INSTANCE_TEMPLATE_NAME: "instance-template1"
+          ZONE_OR_REGION: "us-east1"
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+
       run: |
-        gcloud compute instance-groups managed set-instance-template webapp-igm --region=us-east1 --template=webapp-template-20240410-109999 --project=testing-project-415400
+        gcloud compute instance-groups managed set-instance-template  ${{ env.INSTANCE_GROUP_NAME }} \
+        --region=${{ env.ZONE_OR_REGION }} \
+        --template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+        --project=${{ env.PROJECT_ID }}
 
     - name: Start rolling update
+      env:
+          INSTANCE_GROUP_NAME: "webapp-igm"
+          INSTANCE_TEMPLATE_NAME: "instance-template1"
+          ZONE_OR_REGION: "us-east1"
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+
       run: |
-        gcloud compute instance-groups managed rolling-action start-update webapp-igm --version=template="webapp-template-20240410-109999" --max-surge=5 --region=us-east1 --project=testing-project-415400
+        gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
+        --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+        --max-surge=5 \
+        --region=${{ env.ZONE_OR_REGION }} \
+        --project=${{ env.PROJECT_ID }}
 
     - name: Monitor instance group update
+      env:
+          INSTANCE_GROUP_NAME: "webapp-igm"
+          INSTANCE_TEMPLATE_NAME: "instance-template1"
+          ZONE_OR_REGION: "us-east1"
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+
       run: |
         status="RUNNING"
         while [ "$status" != "True" ]; do
-        status=$(gcloud compute instance-groups managed describe webapp-igm --region=us-east1 --project=testing-project-415400 --format="value(status.versionTarget.isReached)")
+        status=$(gcloud compute instance-groups managed describe webapp-igm --region=us-east1 --project=$PROJECT_ID --format="value(status.versionTarget.isReached)")
         sleep 10
         done
