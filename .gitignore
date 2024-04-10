@@ -130,3 +130,5 @@ dist
 .pnp.*
 
 webapp.zip
+manifest.json
+manifest.json.lock

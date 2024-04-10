@@ -89,6 +89,17 @@ jobs:
     - name: Deploy packer image
       run: packer build packer/packer.pkr.hcl
 
+    - name: GET Packer Image ID
+      id: GET_Packer_Image_Id
+      run: |
+          PACKER_BUILD_IMAGE_ID=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ":" -f2)
+          echo $PACKER_BUILD_IMAGE_ID
+          echo "PACKER_BUILD_IMAGE_ID=$PACKER_BUILD_IMAGE_ID" >> "$GITHUB_OUTPUT"
+          echo NEW_IMAGE=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ":" -f2) >> $GITHUB_ENV
+      
+    - name: Check Packer Image ID
+      run: echo $PACKER_BUILD_IMAGE_ID
+
     - name: Create new instance template version
       run: |
           gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
