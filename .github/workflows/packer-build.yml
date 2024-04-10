@@ -119,6 +119,17 @@ jobs:
             IT_DISK_BOOT: ${{secrets.IT_DISK_BOOT}}
             KMS_KEY_SELF_LINK: ${{secrets.KMS_KEY_SELF_LINK}}
             DEVICE_NAME:  ${{secrets.DEVICE_NAME}}
+            SS_DB_HOST: ${{secrets.SS_DB_HOST}}
+            SS_DB_USER: ${{secrets.SS_DB_USER}}
+            SS_DB_PASSWORD: ${{secrets.SS_DB_PASSWORD}}
+            SS_DB_NAME: ${{secrets.SS_DB_NAME}}
+            SS_DB_PORT: ${{secrets.SS_DB_PORT}}
+            SS_DB_DIALECT: ${{secrets.SS_DB_DIALECT}}
+            SS_DB_POOL_MAX: ${{secrets.SS_DB_POOL_MAX}}
+            SS_DB_POOL_MIN: ${{secrets.SS_DB_POOL_MIN}}
+            SS_DB_POOL_ACQUIRE: ${{secrets.SS_DB_POOL_ACQUIRE}}
+            SS_DB_POOL_IDLE: ${{secrets.SS_DB_POOL_IDLE}}
+
       run: |
           gcloud compute images list  --sort-by=~creationTimestamp --format='value(NAME)' --limit=1
           gcloud compute instance-templates create instance-template1 \
@@ -126,7 +137,7 @@ jobs:
           --description=Creating\ Regional\ Compute\ Instance\ Template \
           --machine-type=e2-medium \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
-          --metadata=startup-script=$STARTUP_SCRIPT \
+          --metadata=startup-script=\#\!/bin/bash$'\n'$'\n'\#\ Navigate\ to\ the\ webapp\ directory$'\n'cd\ /tmp/webapp$'\n'$'\n'\#\ Create\ the\ .env\ file\ with\ the\ required\ values$'\n'cat\ \<\<EOF\ \>\ .env$'\n'DB_HOST=${{env.SS_DB_HOST}}$'\n'DB_USER=${{env.SS_DB_USER}}$'\n'DB_PASSWORD=${{env.SS_DB_PASSWORD}}$'\n'DB_NAME=${{env.SS_DB_NAME}}$'\n'DB_PORT=${{env.SS_DB_PORT}}$'\n'DB_DIALECT=${{env.SS_DB_DIALECT}}$'\n'DB_POOL_MAX=${{env.SS_DB_POOL_MAX}}$'\n'DB_POOL_MIN=${{env.SS_DB_POOL_MIN}}$'\n'DB_POOL_ACQUIRE=${{env.SS_DB_POOL_ACQUIRE}}$'\n'DB_POOL_IDLE=${{env.SS_DB_POOL_IDLE}}$'\n'EOF$'\n'$'\n'\#\ Set\ the\ correct\ permissions\ for\ the\ .env\ file$'\n'chmod\ 655\ /tmp/webapp/.env$'\n'$'\n'\#\ Start\ or\ restart\ the\ service$'\n'sudo\ systemctl\ start\ csye6225$'\n' \
           --maintenance-policy=$MAINTENANCE_POLICY \
           --provisioning-model=$PROVISIONING_MODEL \
           --service-account=$SERVICE_ACCOUNT \
