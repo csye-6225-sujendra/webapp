@@ -135,7 +135,7 @@ jobs:
           gcloud compute instance-templates create instance-template1 \
           --project=${{env.Project_ID}} \
           --description=Creating\ Regional\ Compute\ Instance\ Template \
-          --instance-template-region="$REGION"\
+          --instance-template-region="$REGION" \
           --machine-type=${{env.VIRTUAL_MACHINE_TYPE}} \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
           --metadata=startup-script=${{env.STARTUP_SCRIPT}} \
@@ -155,7 +155,7 @@ jobs:
       env:
           INSTANCE_GROUP_NAME: "webapp-igm"
           INSTANCE_TEMPLATE_NAME: "instance-template1"
-          ZONE_OR_REGION: "us-east1"
+          ZONE_OR_REGION: ${{secrets.REGION}}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
 
       run: |
@@ -168,7 +168,7 @@ jobs:
       env:
           INSTANCE_GROUP_NAME: "webapp-igm"
           INSTANCE_TEMPLATE_NAME: "instance-template1"
-          ZONE_OR_REGION: "us-east1"
+          ZONE_OR_REGION: ${{secrets.REGION}}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
 
       run: |
@@ -182,12 +182,12 @@ jobs:
       env:
           INSTANCE_GROUP_NAME: "webapp-igm"
           INSTANCE_TEMPLATE_NAME: "instance-template1"
-          ZONE_OR_REGION: "us-east1"
+          ZONE_OR_REGION: ${{secrets.REGION}}
           PROJECT_ID: ${{ secrets.PROJECT_ID }}
 
       run: |
         status="RUNNING"
         while [ "$status" != "True" ]; do
-        status=$(gcloud compute instance-groups managed describe webapp-igm --region=us-east1 --project=$PROJECT_ID --format="value(status.versionTarget.isReached)")
+        status=$(gcloud compute instance-groups managed describe $INSTANCE_GROUP_NAME --region=$ZONE_OR_REGION --project=$PROJECT_ID --format="value(status.versionTarget.isReached)")
         sleep 10
         done
