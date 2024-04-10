@@ -135,6 +135,7 @@ jobs:
           gcloud compute instance-templates create instance-template1 \
           --project=${{env.Project_ID}} \
           --description=Creating\ Regional\ Compute\ Instance\ Template \
+          --instance-template-region="$REGION"\
           --machine-type=${{env.VIRTUAL_MACHINE_TYPE}} \
           --network-interface=network-tier=PREMIUM,subnet=webapp \
           --metadata=startup-script=${{env.STARTUP_SCRIPT}} \
@@ -160,7 +161,7 @@ jobs:
       run: |
         gcloud compute instance-groups managed set-instance-template  ${{ env.INSTANCE_GROUP_NAME }} \
         --region=${{ env.ZONE_OR_REGION }} \
-        --template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+        --template=projects/${{ env.PROJECT_ID }}/regions/${{ env.ZONE_OR_REGION }}/instanceTemplates/${{env.INSTANCE_TEMPLATE_NAME}} \
         --project=${{ env.PROJECT_ID }}
 
     - name: Start rolling update
@@ -172,7 +173,7 @@ jobs:
 
       run: |
         gcloud compute instance-groups managed rolling-action start-update ${{ env.INSTANCE_GROUP_NAME }} \
-        --version=template=${{ env.INSTANCE_TEMPLATE_NAME }} \
+        --version=template=projects/${{ env.PROJECT_ID }}/regions/${{ env.ZONE_OR_REGION }}/instanceTemplates/${{env.INSTANCE_TEMPLATE_NAME}} \
         --max-surge=5 \
         --region=${{ env.ZONE_OR_REGION }} \
         --project=${{ env.PROJECT_ID }}
