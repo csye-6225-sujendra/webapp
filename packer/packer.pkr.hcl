@@ -72,7 +72,7 @@ build {
     scripts = [
       "./packer/scripts/create_user.sh",
       "./packer/scripts/unzip.sh",
-      "./packer/scripts/install_node_dependencies.sh"
+      //"./packer/scripts/install_node_dependencies.sh"
     ]
   }
 
