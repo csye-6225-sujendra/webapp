@@ -90,4 +90,8 @@ build {
     script = "./packer/scripts/systemd.sh"
   }
 
+  post-processor "manifest" {
+    output = "manifest.json"
+}
+
 }
