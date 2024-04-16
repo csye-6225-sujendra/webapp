@@ -5,9 +5,9 @@ const { whiteListMethods, checkPayload, verifyUser } = controller.checks;
 const authenticate = controller.authenticate
 
 router.all("/healthz", whiteListMethods, checkPayload, controller.userManagement.healthcheck)
-router.post("/v1/user", controller.userManagement.createUser)
-router.put("/v1/user/self", authenticate, verifyUser, controller.userManagement.updateUser)
-router.get("/v1/user/self", authenticate, verifyUser, controller.userManagement.getUser)
+router.post("/v2/user", controller.userManagement.createUser)
+router.put("/v2/user/self", authenticate, verifyUser, controller.userManagement.updateUser)
+router.get("/v2/user/self", authenticate, verifyUser, controller.userManagement.getUser)
 router.get("/verify", controller.userManagement.verifyEmail)
 
 module.exports = router

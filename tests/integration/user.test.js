@@ -51,7 +51,7 @@ describe('User API Endpoints', () => {
     describe('Test 1: Create an account and validate existence', () => {
         it('should create a new user', async () => {
             const response = await request(app)
-                .post('/v1/user')
+                .post('/v2/user')
                 .send(testUser)
                 .expect(201);
 
@@ -74,7 +74,7 @@ describe('User API Endpoints', () => {
 
         it('should retrieve user details and validate existence', async () => {
             const response = await request(app)
-                .get('/v1/user/self')
+                .get('/v2/user/self')
                 .auth(testUser.username, testUser.password)
                 .expect(200);
 
@@ -92,7 +92,7 @@ describe('User API Endpoints', () => {
         beforeAll(async () => {
             // Authenticate user and get token
             const response = await request(app)
-                .get('/v1/user/self')
+                .get('/v2/user/self')
                 .auth(testUser.username, testUser.password)
                 .expect(200);
 
@@ -111,7 +111,7 @@ describe('User API Endpoints', () => {
             updatedPassword = updatedUserData.password;
 
             await request(app)
-                .put('/v1/user/self')
+                .put('/v2/user/self')
                 .set('Authorization', authToken)
                 .send(updatedUserData)
                 .expect(204);
@@ -127,7 +127,7 @@ describe('User API Endpoints', () => {
         it('should retrieve updated user details and validate', async () => {
             console.log(updatedPassword, "updatedpassword")
             const response = await request(app)
-                .get('/v1/user/self')
+                .get('/v2/user/self')
                 .auth(testUser.username, updatedPassword)
                 .expect(200);
 
